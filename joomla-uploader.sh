@@ -15,7 +15,7 @@ mysql_database_remote='xxxxx'
 ################################################################################
 ################################################################################
 
-# Get some more global values
+# Get some more global values. Extract them from configuration.php.
 function getValue {
     # $1: existing key
 
