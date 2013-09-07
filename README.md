@@ -1,1 +1,3 @@
-Uploading tool
+# Joomla Uploader
+
+*joomla-uploader.sh* should upload the whole locale Joomla!-installation including the MySQL-database to the remote server via FTP. To save time, the files are packaged into a ZIP-file and will be extracted on the remote server using a PHP-script. The script should upload the whole Joomla!-installation only the first time. After this, only the changes will be send. Therefore, the script is only useful, if you will edit your website from **one** computer. And you cannot use the Joomla!-administration of the remote server, because the database will be overwritten the next time *joomla-uploader.sh* is used.
