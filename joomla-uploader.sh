@@ -29,8 +29,8 @@ mysql_username_local=$(getValue user)
 mysql_database_local=$(getValue db)
 password_mysql=$(getValue password)
 # password_ftp= [do not edit: user-input]
-backup_dir="$HOME/.webup"
-zip_file="$backup_dir/${mysql_database_local}.zip"
+app_folder="$HOME/.joomla-uploader"
+zip_file="$app_folder/${mysql_database_local}.zip"
 
 
 # Write php-script into temporary file. The script can extract all entries of
@@ -38,7 +38,7 @@ zip_file="$backup_dir/${mysql_database_local}.zip"
 function createExtractionScript {
     # $1: Name of zip-file without path
     
-    scriptFileName=$(mktemp "$backup_dir/extract_XXXXXXXX.php") || {
+    scriptFileName=$(mktemp "$app_folder/extract_XXXXXXXX.php") || {
         return 1
     }
     echo "<?php
@@ -59,7 +59,7 @@ function createExtractionScript {
 # executes all lines from the local database (mysqldump with 'compact'-option):
 function createSqlScript {
 
-    local sqlScript=$(basename $(mktemp "$backup_dir/sql_XXXXXXXX.php")) || {
+    local sqlScript=$(basename $(mktemp "$app_folder/sql_XXXXXXXX.php")) || {
         return 1
     }
     echo "<?php
@@ -202,7 +202,7 @@ function sendArchiveAndExtract {
 }
 
 function createDirScript {
-    local scriptFileName=$(mktemp "$backup_dir/dir_XXXXXXXX.php") || {
+    local scriptFileName=$(mktemp "$app_folder/dir_XXXXXXXX.php") || {
         return 1
     }
 
@@ -217,14 +217,14 @@ function changeValue {
     # $2: new value
 
     sed -i "s<^\(\s*public\s*\$$1\s*=\s*\).*$<\1\'$2\';<" \
-        "$backup_dir/configuration.php"
+        "$app_folder/configuration.php"
 }
 
 function changeConfiguration {
-    cp "$local_root/configuration.php" "$backup_dir"
+    cp "$local_root/configuration.php" "$app_folder"
 
     dirScript=$(basename $(createDirScript))
-    cd "$backup_dir"
+    cd "$app_folder"
     echo "created $dirScript"
     uploadFile "$dirScript" || {
         echo "Could not upload $dirScript"
@@ -248,8 +248,8 @@ function changeConfiguration {
     changeValue 'log_path' "$mydir/logs"
     changeValue 'tmp_path' "$mydir/tmp"
 
-    uploadFile "$backup_dir/configuration.php" || {
-        echo "Could not upload $backup_dir/configuration.php"
+    uploadFile "$app_folder/configuration.php" || {
+        echo "Could not upload $app_folder/configuration.php"
         exit 1
     }
 }
@@ -270,17 +270,17 @@ curl --quote "NOOP" --user "$ftp_user:$password_ftp" --silent "$ftp_server" \
 }
 echo "OK."
 
-if [ ! -d "$backup_dir" ]; then
-    mkdir --parents "$backup_dir"
+if [ ! -d "$app_folder/backup" ]; then
+    mkdir --parents "$app_folder/backup"
 fi
 
 # Upload the Database first:
 
 ## Get local sql-database
-sqlBackup=$(basename $(mktemp "$backup_dir/sql_XXXXXXXX.sql"))
-cd "$backup_dir"
+sqlBackup=$(basename $(mktemp "$app_folder/sql_XXXXXXXX.sql"))
+cd "$app_folder"
 echo "Try to extract database..."
-mysqldump --opt --compact -u "$mysql_username_local" \
+mysqldump --opt --compact --skip-extended-insert -u "$mysql_username_local" \
     --password="$password_mysql" "$mysql_database_local" > "$sqlBackup" || {
         echo "Could not extract database"
         exit 1
@@ -290,6 +290,7 @@ echo "OK."
 echo "Try to write on remote database..."
 sqlScript=$(basename $(createSqlScript)) || {
     echo "Could not create Script $sqlScript"
+    rm $sqlBackup
     exit 1
 }
 
@@ -317,7 +318,7 @@ curl --silent "$homepage/$remote_root/$sqlScript" || {
 }
 echo "OK."
 
-cp "$sqlBackup" "${mysql_database_local}_$timeScriptStart.sql"
+cp "$sqlBackup" "./backup/${mysql_database_local}_$timeScriptStart.sql"
 removeRemoteFile "$remote_root/$sqlBackup"
 removeRemoteFile "$remote_root/$sqlScript"
 rm "$sqlBackup"
@@ -356,7 +357,7 @@ else
     cd "$local_root"
 
     echo "Looking for changed files..."
-    difzip=$(mktemp "$backup_dir/diff_XXXXXXXX.zip")
+    difzip=$(mktemp "$app_folder/diff_XXXXXXXX.zip")
     zip -r --quiet "$zip_file" . --difference-archive --out "$difzip" || {
         echo "Could not create $difzip."
         exit 1
@@ -365,17 +366,19 @@ else
     if zipinfo "$difzip" > /dev/null; then
         sendArchiveAndExtract "$difzip" || {
             echo "Could not send/extract $difzip."
+            rm $difzip
             exit 1
         }
 
         if zipinfo -1 "$difzip" | grep ^configuration.php$; then
             changeConfiguration || {
-                echo "Could not upload configuration.php"
+                echo "Warning: could not upload configuration.php"
             }
         fi
         
         # Merge the two zip-files after making backup
-        cp "$zip_file" "${zip_file%.*}_$timeScriptStart.zip"
+        zip_basename=$(basename $zip_file)
+        cp "$zip_file" "./backup/${zip_basename%.zip}"
         zipmerge "$zip_file" "$difzip"
     fi
     echo "OK."
@@ -383,8 +386,8 @@ else
     
     # Remove entries in $zip_file and files on server, which were deleted on 
     # $local_root
-    diff_file=$(mktemp "$backup_dir/diff_XXXXXXXX")
-    dirs_file=$(mktemp "$backup_dir/dirs_XXXXXXXX")
+    diff_file=$(mktemp "$app_folder/diff_XXXXXXXX")
+    dirs_file=$(mktemp "$app_folder/dirs_XXXXXXXX")
 
     cd "$local_root"
     echo "Remove remote files if deletet local..."
