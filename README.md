@@ -7,3 +7,35 @@ WARNING: Don't use the script. It is only a test. It works for me, but I think t
 ## Why Joomla Uploader
 
 *joomla-uploader* could be useful for static "one-person"-websites: One person has a website as a local joomla-installation. He wants to upload the installation to a remote server. And when changing the local website, the remote server should be updated, without long synchronizing operations. But this means, that the website will be static: visitors could publish comments, but after running *joomla-uploader* all comments will be lost, because the database will be completely removed and substituded by the local database. 
+
+## How to use
+
+* *joomla-uploader.sh* is a bash-script for linux.
+
+* Dependencies:
+
+    * curl
+    * mawk
+    * mysql-client
+    * sed
+    * unzip
+    * zip
+    * zipmerge
+
+* You have to choose the same password for both the remote and the local database!
+
+* You have to edit the first lines of *joomla-uploader.sh*:
+
+    * homepage: Your homepage-address without subdirectories.
+
+    * ftp_user: Your username, which you are using for FTP-access.
+
+    * ftp_server: The address of your FTP-server including *ftp://* .
+
+    * local_root: The place of your local Joomla!-installation (usually */var/www/* ).
+
+    * remote_root: The subdirectory on your homepage for your Joomla!-website (usually */* ).
+
+    * mysql_username_remote: Your username, to access the database on the remote server.
+
+    * mysql_database_remote: The name of your database on the remote server.
