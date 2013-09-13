@@ -1,7 +1,7 @@
 #!/bin/bash
 # You need to install these packages:
 # sudo apt-get install curl mawk mysql-client sed unzip zip zipmerge
-# You have to choose the same password for the remote database and the locale!
+# You have to choose the same password for the remote database and the local!
 
 # Customize the next lines:
 homepage='xxxxx.bplaced.net'
