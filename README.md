@@ -2,7 +2,7 @@
 
 WARNING: Don't use the script. It is only a test. It works for me, but I think the script is not well written. Helps are welcome!
 
-*joomla-uploader.sh* should upload the whole locale Joomla!-installation including the MySQL-database to the remote server via FTP (I have no SSH...). To save time, the files are packaged into a ZIP-file and will be extracted on the remote server using a PHP-script. The script should upload the whole Joomla!-installation only the first time. After this, only the changes will be send. Therefore, the script is only useful, if you will edit your website from **one** computer. And you cannot use the Joomla!-backend of the remote server, because the database will be overwritten, the next time *joomla-uploader.sh* is used.
+*joomla-uploader.sh* should upload the whole locale Joomla!-installation, including the MySQL-database, to the remote server via FTP, without using SSH (my webhoster do not provide SSH...). To save time, the files are packaged into a ZIP-file and will be extracted on the remote server using a PHP-script. If you run the script for the first time, the whole Joomla!-installation will be uploaded. Subsequent calls will only upload the changes since last call. Therefore, the script is only useful, if you will edit your website from **one** computer. And you cannot use the Joomla!-backend of the remote server, because the database will be overwritten, the next time *joomla-uploader.sh* is used.
 
 ## Why Joomla Uploader
 

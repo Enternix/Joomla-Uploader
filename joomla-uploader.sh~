@@ -287,7 +287,7 @@ mysqldump --opt --compact --skip-extended-insert -u "$mysql_username_local" \
 }
 echo "OK."
 
-echo "Try to write to remote database..."
+echo "Try to write on remote database..."
 sqlScript=$(basename $(createSqlScript)) || {
     echo "Could not create Script $sqlScript"
     rm $sqlBackup
@@ -301,7 +301,7 @@ uploadFile "$sqlBackup" || {
     exit 1
 }
 uploadFile "$sqlScript" || {
-    echo "Could not upload file $sqlScript."
+    echo "Could not upload file $sqlScript"
     rm "$sqlBackup"
     rm "$sqlScript"
     removeRemoteFile "$remote_root/$sqlBackup"
@@ -318,8 +318,7 @@ curl --silent "$homepage/$remote_root/$sqlScript" || {
 }
 echo "OK."
 
-cp "$sqlBackup" \
-    "$app_folder/backup/${mysql_database_local}_$timeScriptStart.sql"
+cp "$sqlBackup" "./backup/${mysql_database_local}_$timeScriptStart.sql"
 removeRemoteFile "$remote_root/$sqlBackup"
 removeRemoteFile "$remote_root/$sqlScript"
 rm "$sqlBackup"
@@ -334,14 +333,14 @@ if [ ! -f "$zip_file" ]; then
 
     cd "$local_root"
 
-    echo "Creating $zip_file..."
+    echo "First creation of $zip_file..."
     zip -r --quiet "$zip_file" . || {
         echo "Could not create $zip_file."
         exit 1
     }
     echo "OK."
     
-    echo "Upload and Extract $zip_file to remote server..."
+    echo "Upload and Extract $zip_file on remote server..."
     sendArchiveAndExtract "$zip_file" || {
         echo "Could not send/extract $zip_file."
         rm "$zip_file"
@@ -392,7 +391,7 @@ else
     dirs_file=$(mktemp "$app_folder/dirs_XXXXXXXX")
 
     cd "$local_root"
-    echo "Eventually remove remote files if missing in local folder..."
+    echo "Remove remote files if deletet local..."
     zip -r --filesync "$zip_file" . > "$diff_file"
     while read CMD; do
         if [[ "$CMD" == "deleting: "* ]]; then
